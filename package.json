@@ -1,0 +1,26 @@
+{
+  "name": "grist-typegen",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clemencefrz/grist-typegen.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/clemencefrz/grist-typegen/issues"
+  },
+  "homepage": "https://github.com/clemencefrz/grist-typegen#readme",
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "tsx": "^4.23.1",
+    "typescript": "^7.0.2"
+  }
+}
