@@ -1,79 +1,77 @@
-//api call https://grist.numerique.gouv.fr/api/docs/{docId}/tables/_grist_Tables_column/records'
-//generated with https://quicktype.io/
-// or copied from https://github.com/gristlabs/grist-core/blob/main/app/plugin/GristData.ts
+/**
+ * In this file, type definitions are generated using https://quicktype.io/ from API calls to
+ * _grist_Tables_column and _grist_Tables and @see https://github.com/gristlabs/grist-core/blob/main/app/plugin/GristData.ts
+ */
+
 export interface GristTablesColumn {
-  records: GristTablesColumnRecord[];
+    records: GristTablesColumnRecord[]
 }
 
 export interface GristTablesColumnRecord {
-  id: number;
-  fields: GristTablesColumnFields;
+    id: number
+    fields: GristTablesColumnFields
 }
 
 export interface GristTablesColumnFields {
-  /** ID of the parent table (references _grist_Tables.id). */
-  parentId: number;
+    /** ID of the parent table (references _grist_Tables.id). */
+    parentId: number
 
-  parentPos: number;
+    parentPos: number
 
-  /** Stable column identifier used by the API and formulas. */
-  colId: string;
+    /** Stable column identifier used by the API and formulas. */
+    colId: string
 
-  /** Grist column type (e.g. "Text", "Numeric", "Bool", "Ref:Table"). */
-  type: string;
+    /** Grist column type (e.g. "Text", "Numeric", "Bool", "Ref:Table"). */
+    type: string
 
-  widgetOptions: string;
-  /** Whether the column is computed from a formula. */
-  isFormula: boolean;
+    widgetOptions: string
+    /** Whether the column is computed from a formula. */
+    isFormula: boolean
 
-  /** Python formula used to compute the column value. */
-  formula: string;
+    /** Python formula used to compute the column value. */
+    formula: string
 
-  /** Human-readable column label displayed in the UI. */
-  label: string;
+    /** Human-readable column label displayed in the UI. */
+    label: string
 
-  /** Optional description/documentation for the column. */
-  description: string;
-  untieColIdFromLabel: boolean;
-  summarySourceCol: number;
-  displayCol: number;
-  visibleCol: number;
-  rules: null;
-  reverseCol: number;
-  recalcWhen: number;
-  recalcDeps: null;
+    /** Optional description/documentation for the column. */
+    description: string
+    untieColIdFromLabel: boolean
+    summarySourceCol: number
+    displayCol: number
+    visibleCol: number
+    rules: null
+    reverseCol: number
+    recalcWhen: number
+    recalcDeps: null
 }
 
 export enum Formula {
-  Empty = "",
-  NombreDEnfant10 = "$Nombre_d_enfant*10",
+    Empty = '',
+    NombreDEnfant10 = '$Nombre_d_enfant*10',
 }
 
-//api call https://grist.numerique.gouv.fr/api/docs/{docId}/tables/_grist_Tables/records'
-//generated with:
-// - https://quicktype.io/
-// - https://github.com/gristlabs/grist-core/blob/main/app/common/schema.ts
 export interface GristTables {
-  records: GristTablesRecord[];
+    records: GristTablesRecord[]
 }
 
 export interface GristTablesRecord {
-  id: number;
-  fields: GristTablesFields;
+    id: number
+    fields: GristTablesFields
 }
 
 export interface GristTablesFields {
-  tableId: string;
-  primaryViewId: number;
-  /** "Ref:_grist_Tables" */
-  summarySourceTable: number;
-  /** A table may be marked as "onDemand", which will keep its data out of the data engine,
-   * and only available to the frontend when requested.
-   * @see https://github.com/gristlabs/grist-core/blob/main/sandbox/grist/schema.py
-   * */
-  onDemand: boolean;
-  rawViewSectionRef: number;
-  recordCardViewSectionRef: number;
+    tableId: string
+    primaryViewId: number
+    /** "Ref:_grist_Tables" */
+    summarySourceTable: number
+    /** A table may be marked as "onDemand", which will keep its data out of the data engine,
+     * and only available to the frontend when requested.
+     * @see https://github.com/gristlabs/grist-core/blob/main/sandbox/grist/schema.py
+     * */
+    onDemand: boolean
+    rawViewSectionRef: number
+    recordCardViewSectionRef: number
 }
 
 /**
@@ -104,28 +102,24 @@ export interface GristTablesFields {
  * @see https://github.com/gristlabs/grist-core/blob/main/app/plugin/GristData.ts
  */
 export type CellValue =
-  | number
-  | string
-  | boolean
-  | null
-  | [GristObjCode, ...unknown[]];
+    number | string | boolean | null | [GristObjCode, ...unknown[]]
 
 /**
  * Letter codes for {@link CellValue} types encoded as [code, args...] tuples.
  * @see https://github.com/gristlabs/grist-core/blob/main/app/plugin/GristData.ts
  */
 export enum GristObjCode {
-  List = "L",
-  LookUp = "l",
-  Dict = "O",
-  DateTime = "D",
-  Date = "d",
-  Skip = "S",
-  Censored = "C",
-  Reference = "R",
-  ReferenceList = "r",
-  Exception = "E",
-  Pending = "P",
-  Unmarshallable = "U",
-  Versions = "V",
+    List = 'L',
+    LookUp = 'l',
+    Dict = 'O',
+    DateTime = 'D',
+    Date = 'd',
+    Skip = 'S',
+    Censored = 'C',
+    Reference = 'R',
+    ReferenceList = 'r',
+    Exception = 'E',
+    Pending = 'P',
+    Unmarshallable = 'U',
+    Versions = 'V',
 }
