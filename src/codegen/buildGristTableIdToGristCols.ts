@@ -2,7 +2,7 @@ import type { GristColumn, GristTable } from '../grist/types'
 import {
     mappingGristTypeColumnToTypeScriptTypeMapping,
     type GristTypeColumnToTypeScriptTypeMapping,
-} from './types'
+} from './mappingTypes'
 
 function isDateLikeType(type: string) {
     return type === 'Date' || type.startsWith('DateTime')

@@ -28,7 +28,7 @@ async function main() {
     }
 
     console.log('Generating type file...')
-    const content = generateTypeFile(gristTableIdToGristColIds)
+    const content = generateTypeFile(gristTableIdToGristColIds, docId)
     writeFileSync(OUTPUT_FILE, content)
 
     console.log(`✓ Type file generated successfully at ${OUTPUT_FILE}`)

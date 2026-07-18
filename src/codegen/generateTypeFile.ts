@@ -1,10 +1,18 @@
 import type { ProcessedColumn } from './buildGristTableIdToGristCols'
 
 export function generateTypeFile(
-    gristTableIdToGristCols: Map<string, ProcessedColumn[]>
+    gristTableIdToGristCols: Map<string, ProcessedColumn[]>,
+    docId?: string
 ): string {
+    const generatedDate = new Date().toISOString()
     const typeDefinitions: string[] = [
-        `import type { GristTypeColumnToTypeScriptTypeMapping } from '../codegen/types'`,
+        `/**`,
+        ` * Auto-generated Grist type definitions`,
+        ` * Generated: ${generatedDate}`,
+        ...(docId ? [` * Document ID: ${docId}`] : []),
+        ` */`,
+        ``,
+        `import type { GristTypeColumnToTypeScriptTypeMapping } from '../codegen/mappingTypes'`,
         ``,
     ]
 
