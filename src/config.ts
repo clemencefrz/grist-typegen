@@ -1,8 +1,6 @@
 import { join } from 'node:path'
 
 export const GRIST_BASE_URL = 'https://grist.numerique.gouv.fr/api/docs'
-export const GRIST_TABLES_COLUMN_TABLE = '_grist_Tables_column'
-export const GRIST_TABLES_TABLE = '_grist_Tables'
 
 export const GENERATED_DIR = join(process.cwd(), 'src', 'generated')
 export const OUTPUT_FILE = join(GENERATED_DIR, 'types.ts')

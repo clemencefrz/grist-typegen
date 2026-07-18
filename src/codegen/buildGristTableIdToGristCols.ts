@@ -1,8 +1,4 @@
-import type {
-    GristTablesColumn,
-    GristTablesColumnRecord,
-    GristTablesRecord,
-} from '../grist/types'
+import type { GristColumn, GristTable } from '../grist/types'
 import {
     mappingGristTypeColumnToTypeScriptTypeMapping,
     type GristTypeColumnToTypeScriptTypeMapping,
@@ -42,14 +38,14 @@ function isGristCellType(
     if (isRefType(type) || isRefListType(type)) {
         return true
     }
-    // gérer les ref
+
     return type in mappingGristTypeColumnToTypeScriptTypeMapping
 }
 
 function formateGristCellTypeForTypescript(
     type: string
 ): GristTypeColumnToTypeScriptTypeMapping[keyof GristTypeColumnToTypeScriptTypeMapping] {
-    if (!isGristCellType) {
+    if (!isGristCellType(type)) {
         throw new Error('Not a Grist Cell Type')
     }
     if (isDateLikeType(type)) {
@@ -67,18 +63,17 @@ function formateGristCellTypeForTypescript(
     return type
 }
 
-type Column = Pick<
-    GristTablesColumn['records'][number]['fields'],
-    'colId' | 'parentId' | 'type'
->
+export type ProcessedColumn = {
+    colId: string
+    type: string | unknown
+}
 
-function transformRecordsToFields(
-    metadataColumnsRecords: GristTablesColumnRecord[]
-): Column[] {
-    const fields = metadataColumnsRecords
-        .filter((record) => !isHiddenColType(record.fields.type))
-        .map((record) => {
-            const { type, colId, parentId } = record.fields
+function formatColumns(columns: GristColumn[]): ProcessedColumn[] {
+    const formattedColumns = columns
+        .filter((column) => !isHiddenColType(column.fields.type))
+        .map((column) => {
+            const { type } = column.fields
+            const colId = column.id
 
             if (!isGristCellType(type)) {
                 throw new Error(
@@ -89,54 +84,36 @@ function transformRecordsToFields(
 
             return {
                 colId,
-                parentId,
                 type: formateGristCellTypeForTypescript(type),
             }
         })
 
-    if (fields.length === 0) {
+    if (formattedColumns.length === 0) {
         throw new Error(
             `No usable column fields found after filtering. All columns may be hidden system columns. ` +
                 `Check your Grist document structure or filtering logic in isHiddenColType.`
         )
     }
 
-    return fields
+    return formattedColumns
 }
 
 export function buildGristTableIdToGristCols(
-    metadataColumnsRecords: GristTablesColumnRecord[],
-    gristTableRecords: GristTablesRecord[]
-): Map<
-    GristTablesRecord['fields']['tableId'],
-    Pick<Column, 'colId' | 'type'>[]
-> {
-    const columns = transformRecordsToFields(metadataColumnsRecords)
-    const tablesWithColumn: Map<
-        GristTablesRecord['fields']['tableId'],
-        Pick<Column, 'colId' | 'type'>[]
-    > = new Map(gristTableRecords.map((record) => [record.fields.tableId, []]))
-    columns.forEach((column) => {
-        const parentId = column.parentId
-        const parentRecord = gristTableRecords.find(
-            (record) => record.id === parentId
-        )
-        if (
-            !parentRecord ||
-            !tablesWithColumn.get(parentRecord.fields.tableId)
-        ) {
-            throw new Error(
-                `parentId ${parentId} of column ${column.colId} is not found in Grist tables`
-            )
-        }
-        const currentColumns = tablesWithColumn.get(parentRecord.fields.tableId)
-        tablesWithColumn.set(parentRecord.fields.tableId, [
-            ...new Set([
-                ...(currentColumns ?? []),
-                { colId: column.colId, type: column.type },
-            ]),
-        ])
-    })
+    tables: GristTable[]
+): Map<string, ProcessedColumn[]> {
+    const tablesWithColumns = new Map<string, ProcessedColumn[]>()
 
-    return tablesWithColumn
+    for (const table of tables) {
+        const tableId = table.id
+        const columns = formatColumns(table.columns)
+        tablesWithColumns.set(tableId, columns)
+    }
+
+    if (tablesWithColumns.size === 0) {
+        throw new Error(
+            'No tables found in Grist document. The document may be empty.'
+        )
+    }
+
+    return tablesWithColumns
 }

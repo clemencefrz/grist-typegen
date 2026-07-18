@@ -1,42 +1,26 @@
 import 'dotenv/config'
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
-import {
-    GENERATED_DIR,
-    GRIST_TABLES_COLUMN_TABLE,
-    GRIST_TABLES_TABLE,
-    OUTPUT_FILE,
-    getGristCredentials,
-} from './config'
-import { fetchMetadataColumns, fetchMetadataTables } from './grist/client'
+import { GENERATED_DIR, OUTPUT_FILE, getGristCredentials } from './config'
+import { fetchTables } from './grist/client'
 
 import { generateTypeFile } from './codegen/generateTypeFile'
 import { buildGristTableIdToGristCols } from './codegen/buildGristTableIdToGristCols'
 
 async function main() {
-    console.log('Retrieving Grist tables column and table data...')
+    console.log('Retrieving Grist tables data...')
     const { docId, apiKey } = getGristCredentials()
 
-    const metadataColumns = await fetchMetadataColumns(docId, apiKey)
-    const metadataTables = await fetchMetadataTables(docId, apiKey)
+    const response = await fetchTables(docId, apiKey)
 
-    const metadataTablesRecords = metadataTables.records
-    if (!metadataTablesRecords || metadataTables.records.length === 0) {
+    if (!response.tables || response.tables.length === 0) {
         throw new Error(
-            `No table records found in Grist table "${GRIST_TABLES_TABLE}". The table may be empty or the document may not have any table defined.`
-        )
-    }
-    const metadataColumnsRecords = metadataColumns.records
-    if (!metadataColumnsRecords || metadataColumnsRecords.length === 0) {
-        throw new Error(
-            `No column records found in Grist table "${GRIST_TABLES_COLUMN_TABLE}". The table may be empty or the document may not have any columns defined.`
+            'No tables found in Grist document. The document may be empty or the API request failed.'
         )
     }
 
     console.log('Table data retrieved successfully.')
-
     const gristTableIdToGristColIds = buildGristTableIdToGristCols(
-        metadataColumnsRecords,
-        metadataTablesRecords
+        response.tables
     )
 
     if (!existsSync(GENERATED_DIR)) {

@@ -1,34 +1,5 @@
-import type * as GristCallApi from './types'
-import {
-    GRIST_BASE_URL,
-    GRIST_TABLES_COLUMN_TABLE,
-    GRIST_TABLES_TABLE,
-} from '../config'
-
-interface FetchOptions {
-    docId: string
-    apiKey?: string | undefined
-    table: string
-}
-
-async function fetchFromGrist<T>(options: FetchOptions): Promise<T> {
-    const { docId, apiKey, table } = options
-    const url = `${GRIST_BASE_URL}/${docId}/tables/${table}/records`
-
-    const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-            accept: 'application/json',
-            ...(apiKey && { authorization: `Bearer ${apiKey}` }),
-        },
-    })
-
-    if (!response.ok) {
-        throw handleFetchError(response, apiKey)
-    }
-
-    return (await response.json()) as T
-}
+import type { GristTablesResponse } from './types'
+import { GRIST_BASE_URL } from '../config'
 
 function handleFetchError(response: Response, apiKey?: string): Error {
     const statusMessage = `${response.status} ${response.statusText}`
@@ -56,24 +27,23 @@ function handleFetchError(response: Response, apiKey?: string): Error {
     )
 }
 
-export async function fetchMetadataColumns(
+export async function fetchTables(
     docId: string,
     apiKey?: string
-): Promise<GristCallApi.GristTablesColumn> {
-    return fetchFromGrist({
-        docId,
-        apiKey,
-        table: GRIST_TABLES_COLUMN_TABLE,
-    })
-}
+): Promise<GristTablesResponse> {
+    const url = `${GRIST_BASE_URL}/${docId}/tables?expand=column`
 
-export async function fetchMetadataTables(
-    docId: string,
-    apiKey?: string
-): Promise<GristCallApi.GristTables> {
-    return fetchFromGrist({
-        docId,
-        apiKey,
-        table: GRIST_TABLES_TABLE,
+    const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            accept: 'application/json',
+            ...(apiKey && { authorization: `Bearer ${apiKey}` }),
+        },
     })
+
+    if (!response.ok) {
+        throw handleFetchError(response, apiKey)
+    }
+
+    return (await response.json()) as GristTablesResponse
 }
