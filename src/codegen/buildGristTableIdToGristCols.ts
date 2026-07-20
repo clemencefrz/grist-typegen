@@ -44,7 +44,7 @@ function isGristCellType(
 
 function formateGristCellTypeForTypescript(
     type: string
-): GristTypeColumnToTypeScriptTypeMapping[keyof GristTypeColumnToTypeScriptTypeMapping] {
+): keyof GristTypeColumnToTypeScriptTypeMapping {
     if (!isGristCellType(type)) {
         throw new Error('Not a Grist Cell Type')
     }
@@ -65,7 +65,7 @@ function formateGristCellTypeForTypescript(
 
 export type ProcessedColumn = {
     colId: string
-    type: string | unknown
+    type: keyof GristTypeColumnToTypeScriptTypeMapping
 }
 
 function formatColumns(columns: GristColumn[]): ProcessedColumn[] {

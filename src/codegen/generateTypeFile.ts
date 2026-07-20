@@ -1,32 +1,48 @@
 import type { ProcessedColumn } from './buildGristTableIdToGristCols'
+import { mappingGristTypeColumnToTypeScriptTypeMapping } from './mappingTypes'
+
+// Helper types referenced by the mapping, imported only when actually emitted.
+const HELPER_TYPES = ['GristObjCode', 'CellValue'] as const
 
 export function generateTypeFile(
     gristTableIdToGristCols: Map<string, ProcessedColumn[]>,
     docId?: string
 ): string {
     const generatedDate = new Date().toISOString()
-    const typeDefinitions: string[] = [
+    const tableDefinitions: string[] = []
+    const usedTypeScriptTypes = new Set<string>()
+
+    gristTableIdToGristCols.forEach((columns, tableId) => {
+        const fieldLines = columns.map(({ colId, type }) => {
+            const typeScriptType =
+                mappingGristTypeColumnToTypeScriptTypeMapping[type]
+            usedTypeScriptTypes.add(typeScriptType)
+            return `  ${colId}: ${typeScriptType},`
+        })
+
+        tableDefinitions.push(`export type ${tableId} = {`)
+        tableDefinitions.push(...fieldLines)
+        tableDefinitions.push(`};`)
+        tableDefinitions.push(``)
+    })
+
+    const neededHelpers = HELPER_TYPES.filter((helper) =>
+        [...usedTypeScriptTypes].some((type) => type.includes(helper))
+    )
+
+    return [
         `/**`,
         ` * Auto-generated Grist type definitions`,
         ` * Generated: ${generatedDate}`,
         ...(docId ? [` * Document ID: ${docId}`] : []),
         ` */`,
         ``,
-        `import type { GristTypeColumnToTypeScriptTypeMapping } from '../codegen/mappingTypes'`,
-        ``,
-    ]
-
-    gristTableIdToGristCols.forEach((columns, tableId) => {
-        const fieldLines = columns.map(
-            ({ colId, type }) =>
-                `  ${colId}: GristTypeColumnToTypeScriptTypeMapping["${type}"],`
-        )
-
-        typeDefinitions.push(`export type ${tableId} = {`)
-        typeDefinitions.push(...fieldLines)
-        typeDefinitions.push(`};`)
-        typeDefinitions.push(``)
-    })
-
-    return typeDefinitions.join('\n')
+        ...(neededHelpers.length
+            ? [
+                  `import type { ${neededHelpers.join(', ')} } from '../grist/types'`,
+                  ``,
+              ]
+            : []),
+        ...tableDefinitions,
+    ].join('\n')
 }
