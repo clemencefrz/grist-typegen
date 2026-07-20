@@ -13,12 +13,20 @@ export function generateTypeFile(
     const usedTypeScriptTypes = new Set<string>()
 
     gristTableIdToGristCols.forEach((columns, tableId) => {
-        const fieldLines = columns.map(({ colId, type }) => {
-            const typeScriptType =
-                mappingGristTypeColumnToTypeScriptTypeMapping[type]
-            usedTypeScriptTypes.add(typeScriptType)
-            return `  ${colId}: ${typeScriptType},`
-        })
+        const fieldLines = columns.map(
+            ({ colId, type, referencedTableId }) => {
+                const typeScriptType =
+                    mappingGristTypeColumnToTypeScriptTypeMapping[type]
+                usedTypeScriptTypes.add(typeScriptType)
+
+                // Only Ref/RefList columns carry a referenced table.
+                const comment = referencedTableId
+                    ? ` // ${type} -> ${referencedTableId}`
+                    : ''
+
+                return `  ${colId}: ${typeScriptType},${comment}`
+            }
+        )
 
         tableDefinitions.push(`export type ${tableId} = {`)
         tableDefinitions.push(...fieldLines)

@@ -63,9 +63,19 @@ function formateGristCellTypeForTypescript(
     return type
 }
 
+// The table a Ref/RefList column points to, e.g. 'Client' for 'Ref:Client'.
+// Attachments is a RefList without a target table.
+function getReferencedTableId(type: string): string | undefined {
+    if (!isRefType(type) && !isRefListType(type)) {
+        return undefined
+    }
+    return type.split(':')[1]
+}
+
 export type ProcessedColumn = {
     colId: string
     type: keyof GristTypeColumnToTypeScriptTypeMapping
+    referencedTableId?: string | undefined
 }
 
 function formatColumns(columns: GristColumn[]): ProcessedColumn[] {
@@ -85,6 +95,7 @@ function formatColumns(columns: GristColumn[]): ProcessedColumn[] {
             return {
                 colId,
                 type: formateGristCellTypeForTypescript(type),
+                referencedTableId: getReferencedTableId(type),
             }
         })
 
