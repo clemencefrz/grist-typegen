@@ -76,13 +76,15 @@ export type ProcessedColumn = {
     colId: string
     type: keyof GristTypeColumnToTypeScriptTypeMapping
     referencedTableId?: string | undefined
+    // Whether the column is computed from a formula (vs. stored data).
+    isFormula: boolean
 }
 
 function formatColumns(columns: GristColumn[]): ProcessedColumn[] {
     const formattedColumns = columns
         .filter((column) => !isHiddenColType(column.fields.type))
         .map((column) => {
-            const { type } = column.fields
+            const { type, isFormula } = column.fields
             const colId = column.id
 
             if (!isGristCellType(type)) {
@@ -96,6 +98,7 @@ function formatColumns(columns: GristColumn[]): ProcessedColumn[] {
                 colId,
                 type: formateGristCellTypeForTypescript(type),
                 referencedTableId: getReferencedTableId(type),
+                isFormula,
             }
         })
 
