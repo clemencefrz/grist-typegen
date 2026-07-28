@@ -51,6 +51,12 @@ export function generateTypeFile(
         )
 
         tableDefinitions.push(`export type ${tableId} = {`)
+
+        const idType = mappingGristTypeColumnToTypeScriptTypeMapping['Id']
+
+        // The Grist native Id column is always present, but not returned by fetchTable endpoint.
+        tableDefinitions.push(`  Id: ${idType}, // Grist native Id column`)
+
         tableDefinitions.push(...fieldLines)
         tableDefinitions.push(`};`)
         tableDefinitions.push(``)
