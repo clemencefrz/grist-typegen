@@ -120,7 +120,9 @@ export function buildGristTableIdToGristCols(
     for (const table of tables) {
         const tableId = table.id
         if (!table.columns) {
-            throw new Error('no columns')
+            throw new Error(
+                'No column metadata found. Did you enable the expand option?'
+            )
         }
         const columns = formatColumns(table.columns)
         tablesWithColumns.set(tableId, columns)

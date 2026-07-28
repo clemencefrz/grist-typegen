@@ -26,9 +26,9 @@ function handleFetchError(response: Response, apiKey?: string): Error {
         `Failed to fetch Grist tables (${statusMessage}). Check your network connection and Grist server status.`
     )
 }
-
-// `expand=column` is what populates TableMetadata.columns; without it the
-// response still parses as TablesGet but every table comes back column-less.
+/**
+ * @see https://support.getgrist.com/api/#tag/tables/operation/listTables
+ */
 export async function fetchTables(
     docId: string,
     apiKey?: string
