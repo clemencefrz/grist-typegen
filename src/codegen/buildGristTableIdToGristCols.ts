@@ -9,7 +9,7 @@ function isDateLikeType(type: string) {
 }
 
 function isRefListType(type: string) {
-    return type === 'Attachments' || type?.startsWith('RefList:')
+    return type.startsWith('RefList:')
 }
 
 function isRefType(type: string) {
@@ -64,7 +64,7 @@ function formateGristCellTypeForTypescript(
 }
 
 // The table a Ref/RefList column points to, e.g. 'Client' for 'Ref:Client'.
-// Attachments is a RefList without a target table.
+// Attachments points to a hidden table, so it carries no target table id.
 function getReferencedTableId(type: string): string | undefined {
     if (!isRefType(type) && !isRefListType(type)) {
         return undefined

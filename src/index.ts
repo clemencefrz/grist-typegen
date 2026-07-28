@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { GENERATED_DIR, OUTPUT_FILE, getGristCredentials } from './config'
 import { fetchTables } from './grist/client'
 
-import { generateTypeFile } from './codegen/generateTypeFile'
+import { generateTypeFile } from './codegen/generateTypeFile/generateTypeFile'
 import { buildGristTableIdToGristCols } from './codegen/buildGristTableIdToGristCols'
 
 async function main() {

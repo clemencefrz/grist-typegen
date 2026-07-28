@@ -1,27 +1,15 @@
-import type { ProcessedColumn } from './buildGristTableIdToGristCols'
-import { mappingGristTypeColumnToTypeScriptTypeMapping } from './mappingTypes'
-
-// Helper types referenced by the mapping, imported only when actually emitted.
-const HELPER_TYPES = ['GristObjCode', 'CellValue'] as const
-
-// A formula column can evaluate to Python None, which Grist returns as null.
-// For instance, its "Text"/"Choice" type is display-only and does not coerce None to ''.
-// So a text-typed formula column is `string | null` at runtime; a plain data
-// text column keeps '' for empty values and stays `string`.
-//
-// This is the single boundary where formula nullability is applied, so every
-// emitted type stays honest without callers repeating the widening.
-function applyFormulaNullability(tsType: string, isFormula: boolean): string {
-    if (!isFormula) {
-        return tsType
-    }
-    // `unknown` already admits null, and mappings that are already nullable
-    // (e.g. `... | null`) need no widening.
-    if (tsType === 'unknown' || tsType.includes('null')) {
-        return tsType
-    }
-    return `${tsType} | null`
-}
+import type { ProcessedColumn } from '../buildGristTableIdToGristCols'
+import {
+    mappingGristTypeColumnToTypeScriptTypeMapping,
+    TYPE_ALIASES_TO_EMIT,
+} from '../mappingTypes'
+import {
+    isEmittedAlias,
+    applyFormulaNullability,
+    EMITTED_ALIASES,
+    HELPER_TYPES,
+    type EmittedAlias,
+} from './utils'
 
 export function generateTypeFile(
     gristTableIdToGristCols: Map<string, ProcessedColumn[]>,
@@ -30,12 +18,19 @@ export function generateTypeFile(
     const generatedDate = new Date().toISOString()
     const tableDefinitions: string[] = []
     const usedTypeScriptTypes = new Set<string>()
+    const usedAliases = new Set<EmittedAlias>()
 
     gristTableIdToGristCols.forEach((columns, tableId) => {
         const fieldLines = columns.map(
             ({ colId, type, referencedTableId, isFormula }) => {
+                const mappedType =
+                    mappingGristTypeColumnToTypeScriptTypeMapping[type]
+                if (isEmittedAlias(mappedType)) {
+                    usedAliases.add(mappedType)
+                }
+
                 const typeScriptType = applyFormulaNullability(
-                    mappingGristTypeColumnToTypeScriptTypeMapping[type],
+                    mappedType,
                     isFormula
                 )
                 usedTypeScriptTypes.add(typeScriptType)
@@ -43,7 +38,9 @@ export function generateTypeFile(
                 // Mark computed columns, and note the target of Ref/RefList columns.
                 const commentParts = [
                     ...(isFormula ? ['Formula'] : []),
-                    ...(referencedTableId ? [`${type} -> ${referencedTableId}`] : []),
+                    ...(referencedTableId
+                        ? [`${type} -> ${referencedTableId}`]
+                        : []),
                 ]
                 const comment = commentParts.length
                     ? ` // ${commentParts.join(', ')}`
@@ -59,8 +56,15 @@ export function generateTypeFile(
         tableDefinitions.push(``)
     })
 
+    // Aliases are declared in the generated file itself, in mapping order.
+    const aliasDeclarations = EMITTED_ALIASES.filter((alias) =>
+        usedAliases.has(alias)
+    ).map((alias) => TYPE_ALIASES_TO_EMIT[alias])
+
     const neededHelpers = HELPER_TYPES.filter((helper) =>
-        [...usedTypeScriptTypes].some((type) => type.includes(helper))
+        [...usedTypeScriptTypes, ...aliasDeclarations].some((type) =>
+            type.includes(helper)
+        )
     )
 
     return [
@@ -76,6 +80,7 @@ export function generateTypeFile(
                   ``,
               ]
             : []),
+        ...(aliasDeclarations.length ? [...aliasDeclarations, ``] : []),
         ...tableDefinitions,
     ].join('\n')
 }

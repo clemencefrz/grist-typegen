@@ -1,4 +1,4 @@
-import type { ProcessedColumn } from './buildGristTableIdToGristCols'
+import type { ProcessedColumn } from '../buildGristTableIdToGristCols'
 import { generateTypeFile } from './generateTypeFile'
 
 const gristTableIdToGristCols = new Map<string, ProcessedColumn[]>([
