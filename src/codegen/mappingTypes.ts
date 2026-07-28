@@ -1,4 +1,4 @@
-import type { GristObjCode, CellValue } from '../grist/types'
+import type { GristObjCode, CellValue } from '../grist/GristData'
 
 /**
  * Maps Grist column types to TypeScript types for type-safe schema generation.

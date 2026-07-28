@@ -1,4 +1,4 @@
-import type { GristColumn, GristTable } from '../grist/types'
+import type { ColumnMetadata, TableMetadata } from '../grist/DocApiTypes'
 import {
     mappingGristTypeColumnToTypeScriptTypeMapping,
     type GristTypeColumnToTypeScriptTypeMapping,
@@ -80,7 +80,7 @@ export type ProcessedColumn = {
     isFormula: boolean
 }
 
-function formatColumns(columns: GristColumn[]): ProcessedColumn[] {
+function formatColumns(columns: ColumnMetadata[]): ProcessedColumn[] {
     const formattedColumns = columns
         .filter((column) => !isHiddenColType(column.fields.type))
         .map((column) => {
@@ -113,12 +113,15 @@ function formatColumns(columns: GristColumn[]): ProcessedColumn[] {
 }
 
 export function buildGristTableIdToGristCols(
-    tables: GristTable[]
+    tables: TableMetadata[]
 ): Map<string, ProcessedColumn[]> {
     const tablesWithColumns = new Map<string, ProcessedColumn[]>()
 
     for (const table of tables) {
         const tableId = table.id
+        if (!table.columns) {
+            throw new Error('no columns')
+        }
         const columns = formatColumns(table.columns)
         tablesWithColumns.set(tableId, columns)
     }
