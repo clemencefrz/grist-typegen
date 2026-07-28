@@ -72,7 +72,7 @@ export function generateTypeFile(
         ``,
         ...(neededHelpers.length
             ? [
-                  `import type { ${neededHelpers.join(', ')} } from '../grist/types'`,
+                  `import type { ${neededHelpers.join(', ')} } from '../grist/GristData'`,
                   ``,
               ]
             : []),

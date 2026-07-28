@@ -1,4 +1,4 @@
-import type { GristTablesResponse } from './types'
+import type { TablesGet } from './DocApiTypes'
 import { GRIST_BASE_URL } from '../config'
 
 function handleFetchError(response: Response, apiKey?: string): Error {
@@ -27,10 +27,12 @@ function handleFetchError(response: Response, apiKey?: string): Error {
     )
 }
 
+// `expand=column` is what populates TableMetadata.columns; without it the
+// response still parses as TablesGet but every table comes back column-less.
 export async function fetchTables(
     docId: string,
     apiKey?: string
-): Promise<GristTablesResponse> {
+): Promise<TablesGet> {
     const url = `${GRIST_BASE_URL}/${docId}/tables?expand=column`
 
     const response = await fetch(url, {
@@ -45,5 +47,5 @@ export async function fetchTables(
         throw handleFetchError(response, apiKey)
     }
 
-    return (await response.json()) as GristTablesResponse
+    return (await response.json()) as TablesGet
 }
